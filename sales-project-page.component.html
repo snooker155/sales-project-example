@@ -1,0 +1,282 @@
+<div
+  class="page sales-project-page"
+  role="main"
+  [attr.aria-hidden]="hasModalDialog"
+  *ngIf="isLoaded"
+>
+  <form
+    class="sales-project-form"
+    (ngSubmit)="onSubmitSalesProject(salesProjectForm)"
+    #salesProjectForm="ngForm"
+    autocomplete="off"
+    novalidate
+  >
+    <div class="page-content">
+      <h1 class="page-headline">Project: {{salesProject.projectName}}</h1>
+
+      <app-alert-group>
+        <app-alert
+          [alert]="alert"
+          [role]="null"
+          *ngIf="alert"
+        ></app-alert>
+
+        <app-alert
+          [alert]="autohideAlert"
+          [role]="null"
+          *ngFor="let autohideAlert of autohideAlerts; index as i"
+        ></app-alert>
+      </app-alert-group>
+
+      <div class="toolbar-buttons-only">
+        <a
+          class="button button-secondary"
+          [href]="salesProject.routingSheetPDFUrl"
+          target="_blank"
+          title="{{FileName.ROUTING_SHEET}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.routingSheetPDFUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.ROUTING_SHEET}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.frameContractPDFUrl"
+          target="_blank"
+          title="{{FileName.FRAME_CONTRACT}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.frameContractPDFUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.FRAME_CONTRACT}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.frameContract1PDFUrl"
+          target="_blank"
+          title="{{FileName.FRAME_CONTRACT_1}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.frameContract1PDFUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.FRAME_CONTRACT_1}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.frameContract2PDFUrl"
+          target="_blank"
+          title="{{FileName.FRAME_CONTRACT_2}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.frameContract2PDFUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.FRAME_CONTRACT_2}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.frameContract3PDFUrl"
+          target="_blank"
+          title="{{FileName.FRAME_CONTRACT_3}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.frameContract3PDFUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.FRAME_CONTRACT_3}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.apiPdfFormUrl"
+          target="_blank"
+          title="{{FileName.API_PDF_FORM}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.apiPdfFormUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.API_PDF_FORM}} PDF</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.ipVpnPdfFormUrl"
+          target="_blank"
+          title="{{FileName.IP_VPN_PDF_FORM}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.ipVpnPdfFormUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.IP_VPN_PDF_FORM}}</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.portalPdfFormUrl"
+          target="_blank"
+          title="{{FileName.PORTAL_PDF_FORM}} von Projekt &quot;{{salesOverview.projectName}}&quot; als PDF Datei anzeigen"
+          *ngIf="salesProject.portalPdfFormUrl && !salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.PORTAL_PDF_FORM}}</span>
+        </a>
+        <a
+          class="button button-secondary"
+          [href]="salesProject.routingSheetJSONUrl"
+          [download]="salesProject.routingSheetJSON.filename"
+          target="_blank"
+          title="{{FileName.PCL_EXPORT}} von Projekt &quot;{{salesOverview.projectName}}&quot; als Datei herunterladen"
+          *ngIf="salesProject.routingSheetJSONUrl && salesProject.isExported"
+        >
+          <span aria-hidden="true">{{FileName.PCL_EXPORT}}</span>
+        </a>
+        <button
+          class="button button-secondary"
+          title="{{FileName.PCL_EXPORT}} von Projekt &quot;{{salesOverview.projectName}}&quot; generieren"
+          type="button"
+          (click)="onClickExportSalesProject($event, salesProject)"
+          *ngIf="salesProjectForm.pristine && canBeExported()"
+        >
+          <span aria-hidden="true">{{FileName.PCL_EXPORT}} generate</span>
+        </button>
+        <button
+          class="button button-secondary"
+          title="Projekt &quot;{{salesOverview.projectName}}&quot; löschen"
+          type="button"
+          (click)="onClickDeleteSalesProject($event, salesOverview)"
+          *ngIf="salesOverview.leadOfferOverviews.length === 0 && !salesProject.isExported"
+        >
+          <span aria-hidden="true">Delete</span>
+        </button>
+      </div>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">Offer in the porject</legend>
+
+        <div
+          class="toolbar"
+          *ngIf="salesOverview.leadOfferOverviews.length > 0 && !disabled || salesOverview.leadOfferOverviews.length > 1 && disabled"
+        >
+          <button
+            class="button button-secondary"
+            title="Alle nicht beauftragten Angebote im Projekt &quot;{{salesOverview.projectName}}&quot; löschen"
+            type="button"
+            (click)="onClickDeleteLeadOffers($event, salesOverview)"
+            *ngIf="canDeleteLeadOffers"
+          >Angebote löschen</button>
+        </div>
+
+        <table
+          class="table sales-project-detail-overview-table"
+          *ngIf="salesOverview && salesOverview.leadOfferOverviews.length > 0"
+        >
+          <caption>>Offer in the porject <em>{{salesProject.projectName}}</em></caption>
+          <thead>
+            <tr>
+              <th>Offer-ID</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              [ngClass]="{'odd': isOdd, 'selected': leadOfferOverview.offerId === offerId}"
+              *ngFor="let leadOfferOverview of salesOverview.leadOfferOverviews; index as j; odd as isOdd"
+            >
+              <td class="lead-offer-id">{{leadOfferOverview.offerId}}</td>
+              <td class="lead-offer-status">
+                <span class="hide-m-xxl">{{leadOfferOverview.offerStatusLabel}}</span>
+                <span class="hide-gt-m-xxl sr-hide">{{leadOfferOverview.offerStatusShortLabel}}</span>
+              </td>
+              <td class="lead-offer-last-modified-date">{{getDateLabel(leadOfferOverview.lastModifiedDate)}}</td>
+              <td class="actions">
+                <div class="lead-offer-actions">
+                  <a
+                    class="button button-secondary button-small"
+                    routerLink="/offer/{{leadOfferOverview.offerId}}"
+                    title="Angebot &quot;{{leadOfferOverview.offerId}}&quot; anzeigen"
+                  >
+                    <span aria-hidden="true">Show</span>
+                  </a>
+                  <a
+                    class="button button-secondary button-small"
+                    routerLink="/sales-project/{{salesOverview.id}}"
+                    [queryParams]="{ offerId: leadOfferOverview.offerId }"
+                    title="Angebot &quot;{{leadOfferOverview.offerId}}&quot; zur Beauftragung auswählen"
+                    *ngIf="!salesOverview.orderedOfferId && leadOfferOverview.offerId !== offerId && !salesOverview.isExported"
+                  >
+                    <span aria-hidden="true">Process</span>
+                  </a>
+                  <a
+                    class="button button-secondary button-small"
+                    routerLink="/offer/{{leadOfferOverview.offerId}}/{{RouteAction.COPY}}"
+                    title="Angebot &quot;{{leadOfferOverview.offerId}}&quot; duplizieren"
+                  >
+                    <span aria-hidden="true">Duplicate</span>
+                  </a>
+                  <button
+                    class="button button-secondary button-small"
+                    title="Angebot &quot;{{leadOfferOverview.offerId}}&quot; löschen"
+                    type="button"
+                    (click)="onClickDeleteLeadOffer($event, leadOfferOverview)"
+                    *ngIf="canDeleteLeadOffer(leadOfferOverview)"
+                  >
+                    <span aria-hidden="true">Delete</span>
+                  </button>
+                  <a
+                    class="button button-secondary button-small"
+                    [href]="leadOfferOverview.pdfUrl"
+                    target="_blank"
+                    title="{{FileName.OFFER}} &quot;{{leadOfferOverview.offerId}}&quot; als PDF Datei anzeigen"
+                    *ngIf="leadOfferOverview.pdfUrl && !salesOverview.isExported"
+                  >
+                    <span aria-hidden="true">{{FileName.OFFER}}s PDF</span>
+                  </a>
+                  <button
+                    class="button button-secondary button-small"
+                    title="Tarife in Angebot &quot;{{leadOfferOverview.offerId}}&quot; anzeigen"
+                    type="button"
+                    (click)="onClickOpenTariffsDialog($event, leadOfferOverview)"
+                  >
+                    <span aria-hidden="true">Show tariffs</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p
+          class="no-results"
+          *ngIf="salesOverview && salesOverview.leadOfferOverviews.length === 0"
+        >There is no offers in this project</p>
+      </fieldset>
+    </div>
+
+
+    <div class="footer-sticky padded">
+      <div class="action-buttons">
+        <div class="action-buttons-secondary">
+          <div class="form-description">
+            <sup>*</sup>Mandatory<br>
+            <sup>**</sup> Mandatory for process
+          </div>
+        </div>
+        <div class="action-buttons-primary">
+          <button
+            id="sales-project-validate"
+            class="button button-primary"
+            title="Fehlende Pflichtfelder im Formular finden"
+            type="button"
+            *ngIf="!canBeFinalized && hasInvalid"
+            (click)="onValidate()"
+          >
+            <span aria-hidden="true">Check</span>
+          </button>
+          <button
+            class="button button-primary"
+            title="Angebot &quot;{{offerId}}&quot; von Projekt &quot;{{salesProject.projectName}}&quot; beauftragen"
+            type="button"
+            [disabled]="!salesProjectForm.form.valid"
+            (click)="onFinalize()"
+            *ngIf="canBeFinalized && !disabled"
+          >
+            <span aria-hidden="true">Process</span>
+          </button>
+          <button
+            id="sales-project-save"
+            class="button button-primary"
+            title="Projekt &quot;{{salesProject.projectName}}&quot; speichern"
+            type="submit"
+            [disabled]="!salesProjectForm.form.valid || salesProjectForm.form.pristine"
+            *ngIf="!canBeFinalized && !disabled"
+          >
+            <span aria-hidden="true">Save</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
